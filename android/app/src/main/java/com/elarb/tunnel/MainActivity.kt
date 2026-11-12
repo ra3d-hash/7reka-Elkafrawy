@@ -27,12 +27,30 @@ class MainActivity : AppCompatActivity() {
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.databaseEnabled = true
+        settings.allowFileAccess = true
+        settings.allowContentAccess = true
+        settings.allowFileAccessFromFileURLs = true
+        settings.allowUniversalAccessFromFileURLs = true
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onReceivedError(
+                view: WebView?,
+                errorCode: Int,
+                description: String?,
+                failingUrl: String?
+            ) {
+                // If any error occurs, guarantee instant offline fallback
+                if (failingUrl != null && !failingUrl.startsWith("file:///android_asset/")) {
+                    webView.loadUrl("file:///android_asset/index.html")
+                }
+            }
+        }
+
         webView.addJavascriptInterface(WebAppInterface(), "AndroidVPN")
 
-        webView.loadUrl("https://ais-pre-iwcr4dhfkxew7zasw2kv7g-372664681136.europe-west1.run.app")
+        // Load the bundled offline web app directly from local assets - 0 second launch, no server required!
+        webView.loadUrl("file:///android_asset/index.html")
     }
 
     inner class WebAppInterface {
@@ -45,6 +63,25 @@ class MainActivity : AppCompatActivity() {
                     stopVpnService()
                 }
             }
+        }
+
+        @JavascriptInterface
+        fun startVpn() {
+            runOnUiThread {
+                prepareAndStartVpn()
+            }
+        }
+
+        @JavascriptInterface
+        fun stopVpn() {
+            runOnUiThread {
+                stopVpnService()
+            }
+        }
+
+        @JavascriptInterface
+        fun isVpnConnected(): Boolean {
+            return isConnected
         }
     }
 
@@ -65,10 +102,11 @@ class MainActivity : AppCompatActivity() {
             }
             startService(vpnIntent)
             isConnected = true
-            Toast.makeText(this, "تم تفعيل VPN العرب بنجاح 🟢", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "تم تفعيل نفق VPN العرب بنجاح 🟢", Toast.LENGTH_SHORT).show()
             webView.evaluateJavascript("javascript:if(window.onVpnConnected) window.onVpnConnected();", null)
         } else {
-            Toast.makeText(this, "تم رفض إذن الاتصال 🔴", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "تم رفض إذن اتصال الـ VPN 🔴", Toast.LENGTH_SHORT).show()
+            webView.evaluateJavascript("javascript:if(window.onVpnDisconnected) window.onVpnDisconnected();", null)
         }
     }
 
@@ -78,7 +116,7 @@ class MainActivity : AppCompatActivity() {
         }
         startService(vpnIntent)
         isConnected = false
-        Toast.makeText(this, "تم فصل الاتصال 🔴", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "تم فصل اتصال الـ VPN 🔴", Toast.LENGTH_SHORT).show()
         webView.evaluateJavascript("javascript:if(window.onVpnDisconnected) window.onVpnDisconnected();", null)
     }
 

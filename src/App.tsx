@@ -133,6 +133,27 @@ export default function App() {
     };
   }, []);
 
+  // Native Android VpnService bridge callbacks
+  useEffect(() => {
+    (window as any).onVpnConnected = () => {
+      setConnectionState('CONNECTED');
+      sfx.playConnected();
+      try {
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+      } catch {
+        // no-op
+      }
+    };
+    (window as any).onVpnDisconnected = () => {
+      setConnectionState('DISCONNECTED');
+      sfx.playDisconnect();
+    };
+    return () => {
+      delete (window as any).onVpnConnected;
+      delete (window as any).onVpnDisconnected;
+    };
+  }, []);
+
   const handleSaveMedia = (url: string, isVid: boolean) => {
     sfx.playSuccess();
     const finalUrl = url.trim() || DEFAULT_MEDIA_URL;
@@ -144,6 +165,16 @@ export default function App() {
 
   const startConnection = () => {
     sfx.playConnectStart();
+
+    // Trigger native Android system VPN if running inside APK
+    if ((window as any).AndroidVPN?.startVpn) {
+      try {
+        (window as any).AndroidVPN.startVpn();
+      } catch (e) {
+        console.warn('Native VPN call fallback:', e);
+      }
+    }
+
     telemetryEngine.connect(currentConfig, (st) => {
       setConnectionState(st);
       if (st === 'CONNECTED') {
@@ -160,6 +191,13 @@ export default function App() {
   const handleToggleConnect = () => {
     if (connectionState === 'CONNECTED') {
       sfx.playDisconnect();
+      if ((window as any).AndroidVPN?.stopVpn) {
+        try {
+          (window as any).AndroidVPN.stopVpn();
+        } catch (e) {
+          console.warn('Native VPN stop fallback:', e);
+        }
+      }
       telemetryEngine.disconnect(setConnectionState);
     } else if (connectionState === 'DISCONNECTED') {
       if (!isVPNPermissionGranted) {
