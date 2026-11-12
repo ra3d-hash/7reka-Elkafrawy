@@ -195,7 +195,7 @@ function validateAndReturnConfig(data: Partial<TunnelConfig>): ParseResult {
     id: data.id || 'cfg-' + Date.now().toString(36),
     name: data.name || 'Elarb Tunnel Config',
     protocol: data.protocol || 'SSH_SSL',
-    serverHost: data.serverHost || 'eg.elarbtunnel.net',
+    serverHost: data.serverHost || '104.16.132.229',
     serverPort: Number(data.serverPort) || 443,
     username: data.username || 'elarb_vip',
     password: data.password || '123456',

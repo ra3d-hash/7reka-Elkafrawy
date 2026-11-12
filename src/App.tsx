@@ -169,7 +169,13 @@ export default function App() {
     // Trigger native Android system VPN if running inside APK
     if ((window as any).AndroidVPN?.startVpn) {
       try {
-        (window as any).AndroidVPN.startVpn();
+        (window as any).AndroidVPN.startVpn(
+          currentConfig.serverHost,
+          currentConfig.serverPort,
+          currentConfig.bugHostSNI || '',
+          currentConfig.protocol,
+          currentConfig.name
+        );
       } catch (e) {
         console.warn('Native VPN call fallback:', e);
       }

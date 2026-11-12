@@ -48,7 +48,7 @@ async function startServer() {
         nodeLocation: 'Cairo, Egypt (EG)',
         serverTimestamp: new Date().toISOString(),
         pingMs,
-        tunnelGateway: 'eg-core.elarbtunnel.net',
+        tunnelGateway: '104.16.132.229 (Cloudflare CDN Edge)',
         encryption: 'TLS 1.3 / ChaCha20-Poly1305',
         carriersSupported: ['Vodafone EG', 'Orange EG', 'Etisalat Misr', 'WE Telecom Egypt']
       });
@@ -61,7 +61,7 @@ async function startServer() {
         nodeLocation: 'Cairo, Egypt (EG)',
         serverTimestamp: new Date().toISOString(),
         pingMs,
-        tunnelGateway: 'eg-core.elarbtunnel.net',
+        tunnelGateway: '104.16.132.229 (Cloudflare CDN Edge)',
         encryption: 'TLS 1.3 / ChaCha20-Poly1305',
         carriersSupported: ['Vodafone EG', 'Orange EG', 'Etisalat Misr', 'WE Telecom Egypt']
       });
@@ -184,7 +184,7 @@ async function startServer() {
 client
 dev tun
 proto tcp
-remote eg-${String(carrier).toLowerCase()}.elarbtunnel.net 443
+remote 104.16.132.229 443
 resolv-retry infinite
 nobind
 persist-key
@@ -196,7 +196,7 @@ key-direction 1
 verb 3
 
 # Egyptian DPI Bypass HTTP Proxy Directive
-http-proxy 163.172.180.12 8080
+http-proxy 104.16.132.229 8080
 http-proxy-option CUSTOM-HEADER Host "${host}"
 http-proxy-option CUSTOM-HEADER X-Online-Host "${host}"
 http-proxy-option CUSTOM-HEADER Connection "Upgrade"
@@ -225,7 +225,7 @@ external-controller: 127.0.0.1:9090
 proxies:
   - name: "🇪🇬 Elarb ${carrier} [0.0 Bug SNI]"
     type: vmess
-    server: eg-${String(carrier).toLowerCase()}.elarbtunnel.net
+    server: 104.16.132.229
     port: 443
     uuid: "a0e9c3b1-7bca-4f95-8986-f3a762421c57"
     alterId: 0
@@ -258,7 +258,7 @@ rules:
     const vmessConfig = {
       v: "2",
       ps: `🇪🇬 Elarb Tunnel [${carrier} EG 0.0]`,
-      add: `eg-${String(carrier).toLowerCase()}.elarbtunnel.net`,
+      add: "104.16.132.229",
       port: "443",
       id: "a0e9c3b1-7bca-4f95-8986-f3a762421c57",
       aid: "0",
@@ -272,7 +272,7 @@ rules:
     };
 
     const vmessUri = `vmess://${Buffer.from(JSON.stringify(vmessConfig)).toString('base64')}`;
-    const vlessUri = `vless://a0e9c3b1-7bca-4f95-8986-f3a762421c57@eg-${String(carrier).toLowerCase()}.elarbtunnel.net:443?encryption=none&security=tls&sni=${host}&type=ws&host=${host}&path=%2Felarb-tunnel#${encodeURIComponent(`Elarb_${carrier}_VIP`)}`;
+    const vlessUri = `vless://a0e9c3b1-7bca-4f95-8986-f3a762421c57@104.16.132.229:443?encryption=none&security=tls&sni=${host}&type=ws&host=${host}&path=%2Felarb-tunnel#${encodeURIComponent(`Elarb_${carrier}_VIP`)}`;
 
     res.json({
       carrier,
