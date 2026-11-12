@@ -17,7 +17,9 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
     - name: Set up Node.js 20
       uses: actions/setup-node@v4
@@ -29,18 +31,19 @@ jobs:
         npm install --legacy-peer-deps
         npm run build
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+    - name: Configure Android SDK Path
+      run: |
+        echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
     - name: Build Android APK
       run: |
         cd android
-        gradle assembleDebug --no-daemon || true
+        gradle assembleDebug --stacktrace
 
-    - name: Upload Release Artifacts
+    - name: Upload APK Release Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Elarb-Tunnel-Release
+        name: Elarb-Tunnel-APK-Package
         path: |
-          dist/
           android/app/build/outputs/apk/debug/app-debug.apk
+          dist/
