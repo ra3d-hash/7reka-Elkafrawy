@@ -1,0 +1,6 @@
+{
+  "name": "Hamo Tunnel Plus",
+  "description": "Ultra-fast VPN, SSH, V2Ray, and Hysteria UDP tunneling app with live telemetry stream, .hat encrypted config ecosystem, and 1-click DPI bypass.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
